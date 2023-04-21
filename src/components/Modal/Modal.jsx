@@ -1,4 +1,4 @@
-import { Component, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Overlay, BigPic } from './Modal.styled';
 import { createPortal } from 'react-dom';
 

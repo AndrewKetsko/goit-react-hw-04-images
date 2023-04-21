@@ -1,4 +1,4 @@
-import { Component, useState } from 'react';
+import { useState } from 'react';
 import { Card, Image } from './Image.styled';
 import {Modal} from 'components/Modal/Modal';
 

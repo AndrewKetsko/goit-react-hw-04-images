@@ -1,4 +1,3 @@
-import { Component } from 'react';
 import { Button, Form, Input, Label, Search } from './Searchbar.styled';
 import { BsSearch } from 'react-icons/bs';
 import { toast } from 'react-toastify';
