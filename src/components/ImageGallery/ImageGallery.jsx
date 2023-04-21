@@ -1,32 +1,30 @@
-import ImageGalleryItem from 'components/ImageGalleryItem/ImageGalleryItem';
+import {ImageGalleryItem} from 'components/ImageGalleryItem/ImageGalleryItem';
 import { Gallery, Message } from './Gallery.styled';
-import { Component } from 'react';
+import { Component, useEffect, useState } from 'react';
 import axios from 'axios';
 import { refs } from 'refs';
 import { toast } from 'react-toastify';
 import Button from 'components/Button/Button';
 import { Dna } from 'react-loader-spinner';
 
-export default class ImageGallery extends Component {
-  state = {
-    images: [],
-    page: 1,
-    total: 0,
-    isLoading: false,
-  };
+export const ImageGallery = ({ search }) => {
+  const [images, setImages] = useState([]);
+  // const [page, setPage] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevProps.search !== this.props.search) {
-      this.submitNewSearch();
-    }
-  }
+  useEffect(() => {
+    if (!search) { return };
+    submitNewSearch();
+  }, [search]);
 
-  getPhotos = async () => {
-    this.setState({ isLoading: true });
-    refs.parameters.q = this.props.search;
-    refs.parameters.page = this.state.page;
+  const getPhotos = async () => {
+    setIsLoading(true);
+    refs.parameters.q = search;
+    refs.parameters.page += 1;
     const searchParameters = new URLSearchParams(refs.parameters);
     const getURL = `${refs.URL}?${searchParameters}`;
+    console.log(refs.parameters.page);
 
     try {
       const response = await axios.get(getURL);
@@ -34,47 +32,36 @@ export default class ImageGallery extends Component {
     } catch (error) {
       toast('Sorry, some server error. Please try again.');
     } finally {
-      this.setState({ isLoading: false });
+    setIsLoading(false);
     }
   };
 
-  submitNewSearch = async () => {
-    await this.setState({
-      page: 1,
-      images: [],
-    });
-
-    const result = await this.getPhotos();
-    await this.fullfillState(result);
+  const submitNewSearch = async () => {
+    refs.parameters.page = 0;
+    await setImages([]);
+    const result = await getPhotos();
+    await fullfillState(result);
   };
 
-  loadMore = async e => {
-    const result = await this.getPhotos();
-    await this.fullfillState(result);
+  const loadMore = async e => {
+    const result = await getPhotos();
+    await fullfillState(result);
   };
 
-  fullfillState = result => {
+  const fullfillState = result => {
     if (!result) {
       return;
     }
-    this.setState(prev => {
-      return {
-        page: prev.page + 1,
-        total: result.totalHits,
-        images: prev.images.concat(
-          result.hits.map(({ id, webformatURL, largeImageURL, tags }) => ({
-            id,
-            webformatURL,
-            largeImageURL,
-            tags,
-          }))
-        ),
-      };
-    });
-  };
+    // refs.parameters.page += 1;
+    setTotal(result.totalHits);
+    setImages(prev => prev.concat(
+      result.hits.map(({ id, webformatURL, largeImageURL, tags }) => ({
+        id,
+        webformatURL,
+        largeImageURL,
+        tags,
+      }))))};
 
-  render() {
-    const { images, page, total, isLoading } = this.state;
     return (
       <>
         <Gallery>
@@ -83,14 +70,14 @@ export default class ImageGallery extends Component {
           ))}
         </Gallery>
 
-        {total === 0 && this.props.search.length > 0 && !isLoading && (
+        {total === 0 && search.length > 0 && !isLoading && (
           <Message>There are no photos for your request</Message>
         )}
 
-        {page > 1 &&
+        {refs.parameters.page > 0 &&
           isLoading === false &&
-          total - page * refs.parameters.per_page > 0 && (
-            <Button onClick={this.loadMore} />
+          total - refs.parameters.page * refs.parameters.per_page > 0 && (
+            <Button onClick={loadMore} />
           )}
 
         <Dna
@@ -103,5 +90,4 @@ export default class ImageGallery extends Component {
         />
       </>
     );
-  }
 }

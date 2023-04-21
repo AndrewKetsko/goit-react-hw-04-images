@@ -1,27 +1,22 @@
-import { Component } from 'react';
+import { Component, useState } from 'react';
 import { Card, Image } from './Image.styled';
-import Modal from 'components/Modal/Modal';
+import {Modal} from 'components/Modal/Modal';
 
-export default class ImageGalleryItem extends Component {
-  state = {
-    isOpen: false,
-  };
+export const ImageGalleryItem = ({ image }) => {
+  const [isOpen, setIsOpen] = useState(false);
 
-  openModal = () => this.setState({ isOpen: true });
-  closeModal = () => this.setState({ isOpen: false });
+  const openModal = () => setIsOpen(true);
+  const closeModal = () => setIsOpen(false);
 
-  render() {
-    const { webformatURL, tags, largeImageURL } = this.props.image;
-    return (
-      <Card>
-        <Image onClick={this.openModal} src={webformatURL} alt={tags} />
-        {this.state.isOpen && (
-          // <Modal url={largeImageURL} tags={tags} onClose={this.closeModal} />
-          <Modal onClose={this.closeModal}>
-            <img src={largeImageURL} alt={tags} />
-          </Modal>
-        )}
-      </Card>
-    );
-  }
-}
+  const { webformatURL, tags, largeImageURL } = image;
+  return (
+    <Card>
+      <Image onClick={openModal} src={webformatURL} alt={tags} />
+      {isOpen && (
+        <Modal onClose={closeModal}>
+          <img src={largeImageURL} alt={tags} />
+        </Modal>
+      )}
+    </Card>
+  );
+};
