@@ -31,8 +31,6 @@ export const ImageGallery = ({ search }) => {
 
     try {
       const response = await axios.get(getURL);
-      // null to uncomment
-      await setPage(prev => prev + 1);
       return response.data;
     } catch (error) {
       toast('Sorry, some server error. Please try again.');
@@ -59,6 +57,7 @@ export const ImageGallery = ({ search }) => {
       return;
     }
     // refs.parameters.page += 1;
+    setPage(prev => prev + 1);
     setTotal(result.totalHits);
     setImages(prev =>
       prev.concat(
