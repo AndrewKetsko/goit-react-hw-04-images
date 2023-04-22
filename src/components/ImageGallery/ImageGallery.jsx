@@ -87,7 +87,7 @@ export const ImageGallery = ({ search }) => {
       {page > 0 &&
         isLoading === false &&
         // total - refs.parameters.page * refs.parameters.per_page > 0 && (
-        total - page * refs.parameters.per_page > 0 && (
+        total - (page-1) * refs.parameters.per_page > 0 && (
           <Button onClick={loadMore} />
         )}
 
