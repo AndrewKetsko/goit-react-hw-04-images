@@ -7,7 +7,7 @@ export const refs = {
     image_type: 'photo',
     orientation: 'horizontal',
     safesearch: true,
-    // page: 1,
+    page: 1,
     per_page: 12,
   },
 };

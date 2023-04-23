@@ -1,6 +1,6 @@
 import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
 import { Gallery, Message } from './Gallery.styled';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { refs } from 'refs';
 import { toast } from 'react-toastify';
@@ -12,53 +12,50 @@ export const ImageGallery = ({ search }) => {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
-    if (!search) {
-      return;
-    }
-    submitNewSearch();
+    // if (!search) {
+    //   return;
+    // }
+    refs.parameters.q = search;
+    setPage(1);
+    setImages([]);
   }, [search]);
 
-  const getPhotos = async () => {
-    setIsLoading(true);
-    refs.parameters.q = search;
-    // refs.parameters.page += 1;
-    refs.parameters.page = page;
-    const searchParameters = new URLSearchParams(refs.parameters);
-    const getURL = `${refs.URL}?${searchParameters}`;
-    console.log(refs.parameters.page);
-
-    try {
-      const response = await axios.get(getURL);
-      return response.data;
-    } catch (error) {
-      toast('Sorry, some server error. Please try again.');
-    } finally {
-      setIsLoading(false);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
     }
-  };
+    const getPhotos = async () => {
+      setIsLoading(true);
+      refs.parameters.page = page;
+      const searchParameters = new URLSearchParams(refs.parameters);
+      const getURL = `${refs.URL}?${searchParameters}`;
+      try {
+        const response = await axios.get(getURL);
+        await fullfillState(response.data);
+      } catch (error) {
+        toast('Sorry, some server error. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    getPhotos();
+  }, [page]);
 
-  const submitNewSearch = async () => {
-    // refs.parameters.page = 0;
-    await setPage(1);
-    await setImages([]);
-    const result = await getPhotos();
-    await fullfillState(result);
-  };
-
-  const loadMore = async e => {
-    const result = await getPhotos();
-    await fullfillState(result);
+  const loadMore = e => {
+    setPage(prev => prev + 1);
   };
 
   const fullfillState = result => {
     if (!result) {
       return;
     }
-    // refs.parameters.page += 1;
-    setPage(prev => prev + 1);
     setTotal(result.totalHits);
+    //=========================
+    setPage(prev => (result.totalHits === 0 ? 2 : prev));
     setImages(prev =>
       prev.concat(
         result.hits.map(({ id, webformatURL, largeImageURL, tags }) => ({
@@ -83,11 +80,9 @@ export const ImageGallery = ({ search }) => {
         <Message>There are no photos for your request</Message>
       )}
 
-      {/* {refs.parameters.page > 0 && */}
       {page > 0 &&
         isLoading === false &&
-        // total - refs.parameters.page * refs.parameters.per_page > 0 && (
-        total - (page-1) * refs.parameters.per_page > 0 && (
+        total - (page - 1) * refs.parameters.per_page > 0 && (
           <Button onClick={loadMore} />
         )}
 
