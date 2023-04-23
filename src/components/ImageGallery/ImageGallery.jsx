@@ -15,9 +15,9 @@ export const ImageGallery = ({ search }) => {
   const isFirstRender = useRef(true);
 
   useEffect(() => {
-    // if (!search) {
-    //   return;
-    // }
+    if (!search) {
+      return;
+    }
     refs.parameters.q = search;
     setPage(1);
     setImages([]);
