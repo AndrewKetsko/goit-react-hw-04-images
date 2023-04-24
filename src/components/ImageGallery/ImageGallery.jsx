@@ -13,6 +13,7 @@ export const ImageGallery = ({ search }) => {
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const isFirstRender = useRef(true);
+  const [toggleState, setToggleState] = useState(true);
 
   useEffect(() => {
     if (!search) {
@@ -21,6 +22,7 @@ export const ImageGallery = ({ search }) => {
     refs.parameters.q = search;
     setPage(1);
     setImages([]);
+    setToggleState(prev => !prev);
   }, [search]);
 
   useEffect(() => {
@@ -43,7 +45,7 @@ export const ImageGallery = ({ search }) => {
       }
     };
     getPhotos();
-  }, [page]);
+  }, [page, toggleState]);
 
   const loadMore = e => {
     setPage(prev => prev + 1);
@@ -54,8 +56,6 @@ export const ImageGallery = ({ search }) => {
       return;
     }
     setTotal(result.totalHits);
-    //=========================
-    setPage(prev => (result.totalHits === 0 ? 2 : prev));
     setImages(prev =>
       prev.concat(
         result.hits.map(({ id, webformatURL, largeImageURL, tags }) => ({
@@ -82,7 +82,7 @@ export const ImageGallery = ({ search }) => {
 
       {page > 0 &&
         isLoading === false &&
-        total - (page - 1) * refs.parameters.per_page > 0 && (
+        total - (page) * refs.parameters.per_page > 0 && (
           <Button onClick={loadMore} />
         )}
 
