@@ -6,15 +6,16 @@ export const Searchbar = ({ setSearch, search }) => {
   
   const submitForm = e => {
     e.preventDefault();
-    if (!e.target.search.value.trim()) {
+    const searchValue = e.target.search.value.trim().split(' ').join('+');
+    if (!searchValue) {
       toast('Enter some word to search');
       return;
     }
-    if (search === e.target.search.value.trim().split(' ').join('+')) {
+    if (search === searchValue) {
       toast('Enter new search please');
       return;
     }
-    setSearch(e.target.search.value.trim().split(' ').join('+'));
+    setSearch(searchValue);
   };
 
   return (

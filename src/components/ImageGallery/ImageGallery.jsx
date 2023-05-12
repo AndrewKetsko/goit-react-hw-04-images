@@ -1,11 +1,11 @@
 import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
 import { Gallery, Message } from './Gallery.styled';
 import { useEffect, useRef, useState } from 'react';
-import axios from 'axios';
 import { refs } from 'refs';
 import { toast } from 'react-toastify';
 import Button from 'components/Button/Button';
 import { Dna } from 'react-loader-spinner';
+import { getImages } from 'fetchApi';
 
 export const ImageGallery = ({ search }) => {
   const [images, setImages] = useState([]);
@@ -30,21 +30,17 @@ export const ImageGallery = ({ search }) => {
       isFirstRender.current = false;
       return;
     }
-    const getPhotos = async () => {
+    (async () => {
       setIsLoading(true);
       refs.parameters.page = page;
-      const searchParameters = new URLSearchParams(refs.parameters);
-      const getURL = `${refs.URL}?${searchParameters}`;
       try {
-        const response = await axios.get(getURL);
-        await fullfillState(response.data);
+        fullfillState(await getImages());
       } catch (error) {
         toast('Sorry, some server error. Please try again.');
       } finally {
         setIsLoading(false);
       }
-    };
-    getPhotos();
+    })();
   }, [page, toggleState]);
 
   const loadMore = e => {
@@ -82,7 +78,7 @@ export const ImageGallery = ({ search }) => {
 
       {page > 0 &&
         isLoading === false &&
-        total - (page) * refs.parameters.per_page > 0 && (
+        total - page * refs.parameters.per_page > 0 && (
           <Button onClick={loadMore} />
         )}
 
